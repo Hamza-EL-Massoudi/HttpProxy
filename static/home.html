@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Http Proxy</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: row; /* Changed from column to row */
+        justify-content: center;
+        align-items: flex-start; /* Changed from center to flex-start */
+        height: 100vh;
+      }
+
+      .form {
+        display: flex;
+        flex-direction: column; /* Changed from row to column */
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      input[type='text'] {
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 300px;
+        margin: 1rem;
+      }
+
+      #submit {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      #submit:hover {
+        background-color: #45a049;
+      }
+
+      .result {
+        padding: 10px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 400px;
+        max-width: 90%;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="form">
+        <input
+          type="text"
+          id="url"
+          onkeypress="handleKeyPress(event)"
+          placeholder="Enter a url"
+        />
+        <br />
+        <button type="button" id="submit" onclick="submitForm()">
+          Submit
+        </button>
+        <div id="result" class="result"></div>
+      </div>
+      <div class="form">
+        <input
+          type="text"
+          id="url2"
+          onkeypress="handleKeyPress2(event)"
+          placeholder="Enter a url with cache"
+        />
+        <br />
+        <button type="button" id="submit" onclick="submitForm2()">
+          Submit with Cache
+        </button>
+        <div id="result2" class="result"></div>
+      </div>
+    </div>
+    <script>
+      function handleKeyPress(e) {
+        if (e.keyCode === 13) {
+          submitForm();
+        }
+      }
+      function submitForm() {
+        const originalUrl = document.getElementById('url').value;
+        makeRequest(originalUrl, false);
+      }
+
+      async function makeRequest(url, withCache) {
+        // const params = new URLSearchParams({ originalUrl: url });
+        const endpoint = withCache
+          ? 'http://localhost:3000/withcache'
+          : 'http://localhost:3000/withoutcache';
+        const response = await fetch(`${endpoint}/${url}`, {
+          method: 'GET',
+        }).catch((err) => {
+          console.log(err);
+        });
+        const data = await response.json().catch((err) => {
+          console.log(err);
+        });
+        console.log(data);
+        const resultElement = withCache ? 'result2' : 'result';
+        document.getElementById(resultElement).innerText =
+          JSON.stringify(data, null, 2); // Convert data to JSON string with indentation
+      }
+
+      function handleKeyPress2(e) {
+        if (e.keyCode === 13) {
+          submitForm2();
+        }
+      }
+      function submitForm2() {
+        const urlWithCache = document.getElementById('url2').value;
+        makeRequest(urlWithCache, true);
+      }
+    </script>
+  </body>
+</html>
