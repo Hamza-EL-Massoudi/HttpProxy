@@ -4,6 +4,7 @@ const checkCache = require('./utils/checkCache');
 const postRouter = require('./routes/postRoute');
 const userRouter = require('./routes/userRoute');
 const mongoose = require('mongoose');
+const morgan = require('morgan');
 
 const app = express();
 const port = 3000;
@@ -25,6 +26,7 @@ mongoose
 
 app.use(express.json());
 app.use(express.static('static'));
+app.use(morgan('combined'));
 
 app.use('/withcache/posts', checkCache, postRouter);
 app.use('/withoutcache/posts', postRouter);
