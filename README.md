@@ -14,6 +14,20 @@ This project is for learning purposes only. It is a JavaScript application that 
 - `utils/`: This folder contains any utility functions or files that our application might need.
 - `static/`: This folder contains static files like HTML, CSS, and JavaScript.
 
+## Installation
+
+to install the project dependencies run the following command:
+
+```bash
+npm install
+```
+
+add a .env file to the root of the project with the following variables:
+
+```bash
+DATABASE_URL=mongodb://localhost:27017/your-database-name
+```
+
 ## Available Scripts
 
 - `npm start`: Starts the server in development mode

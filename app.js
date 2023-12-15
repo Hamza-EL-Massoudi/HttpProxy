@@ -6,6 +6,8 @@ const userRouter = require('./routes/userRoute');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 
+require('dotenv').config();
+
 const app = express();
 const port = 3000;
 
@@ -13,7 +15,7 @@ const BASE_URL = 'https://jsonplaceholder.typicode.com';
 
 // Connect to MongoDB
 mongoose
-  .connect('mongodb://localhost/redisAppDatabase', {
+  .connect(process.env.DATABASE_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
