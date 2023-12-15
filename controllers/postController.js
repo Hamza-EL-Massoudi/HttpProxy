@@ -1,20 +1,33 @@
 const Post = require('../models/postModel.js');
+const fetchAndSavePost = require('../services/fetchAndSavePost.js');
+const BASE_URL = require('../utils/BASE_URL.js');
 
 class PostController {
-  async savePost(postData) {
-    try {
-      const newPost = new Post(postData);
-      await newPost.save();
-      console.log(`Post "${postData.title}" saved to the database.`);
-    } catch (error) {
-      console.error('Error saving post:', error.message);
-      throw new Error('Error saving post');
-    }
-  }
-
   async getAllPosts(req, res) {
     try {
       const posts = await Post.find();
+      if (!posts) {
+        const response = await fetch(`${BASE_URL}/posts/${postId}`);
+        if (!response.ok) {
+          return res.status(404).json({ error: 'Post not found' });
+        }
+
+        let data = response.json();
+        if (data.length > 0) {
+          data.foreach(async (post) => {
+            const newPost = new Post({
+              id: post.id,
+              userId: post.userId,
+              title: post.title,
+              body: post.body,
+            });
+            await newPost.save();
+            console.log(
+              `Post "${newPost.title}" saved to the database.`
+            );
+          });
+        }
+      }
       res.json(posts);
     } catch (error) {
       console.error('Error getting posts:', error.message);
@@ -23,59 +36,29 @@ class PostController {
   }
 
   async getPostById(req, res) {
-    const postId = req.params.id;
+    console.log('Getting post by ID');
+    const postId = req.params.postId;
 
     try {
-      const post = await Post.findOne({ id: postId });
-
+      let post = await Post.findOne({ id: postId });
+      console.log(post);
       if (!post) {
-        return res.status(404).json({ error: 'Post not found' });
+        try {
+          post = await fetchAndSavePost(postId);
+          console.log(post);
+          return res.json(post);
+        } catch (error) {
+          console.error('Error getting post by ID:', error.message);
+          return res
+            .status(500)
+            .json({ error: 'Internal Server Error' });
+        }
+      } else {
+        return res.json(post);
       }
-
-      res.json(post);
     } catch (error) {
       console.error('Error getting post by ID:', error.message);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  }
-
-  async updatePostById(req, res) {
-    const postId = req.params.id;
-    const updatedData = req.body;
-
-    try {
-      const updatedPost = await Post.findOneAndUpdate(
-        { id: postId },
-        updatedData,
-        { new: true }
-      );
-
-      if (!updatedPost) {
-        return res.status(404).json({ error: 'Post not found' });
-      }
-
-      console.log(`Post "${updatedPost.title}" updated.`);
-      res.json(updatedPost);
-    } catch (error) {
-      console.error('Error updating post:', error.message);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  }
-
-  async deletePostById(req, res) {
-    const postId = req.params.id;
-
-    try {
-      const deletedPost = await Post.findOneAndDelete({ id: postId });
-      if (!deletedPost) {
-        return res.status(404).json({ error: 'Post not found' });
-      }
-
-      console.log(`Post "${deletedPost.title}" deleted.`);
-      res.json(deletedPost);
-    } catch (error) {
-      console.error('Error deleting post:', error.message);
-      res.status(500).json({ error: 'Internal Server Error' });
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
   }
 }
