@@ -1,20 +1,22 @@
 const Post = require('../models/postModel.js');
 const fetchAndSavePost = require('../services/fetchAndSavePost.js');
 const BASE_URL = require('../utils/BASE_URL.js');
+const redisClient = require('../utils/redisConnection.js');
 
 class PostController {
   async getAllPosts(req, res) {
     try {
       const posts = await Post.find();
-      if (!posts) {
-        const response = await fetch(`${BASE_URL}/posts/${postId}`);
+      if (!posts || posts.length !== 100) {
+        const response = await fetch(`${BASE_URL}/posts`);
         if (!response.ok) {
           return res.status(404).json({ error: 'Post not found' });
         }
 
-        let data = response.json();
+        let data = await response.json();
+
         if (data.length > 0) {
-          data.foreach(async (post) => {
+          data.forEach(async (post) => {
             const newPost = new Post({
               id: post.id,
               userId: post.userId,
@@ -22,12 +24,22 @@ class PostController {
               body: post.body,
             });
             await newPost.save();
-            console.log(
-              `Post "${newPost.title}" saved to the database.`
-            );
           });
         }
       }
+      redisClient.set(
+        req.originalUrl,
+        JSON.stringify(posts),
+        (err, reply) => {
+          if (err) {
+            console.error('Error setting key in Redis:', err.message);
+
+            return res
+              .status(500)
+              .json({ error: 'Internal Server Error' });
+          }
+        }
+      );
       res.json(posts);
     } catch (error) {
       console.error('Error getting posts:', error.message);
@@ -36,26 +48,33 @@ class PostController {
   }
 
   async getPostById(req, res) {
-    console.log('Getting post by ID');
     const postId = req.params.postId;
 
     try {
       let post = await Post.findOne({ id: postId });
-      console.log(post);
       if (!post) {
         try {
           post = await fetchAndSavePost(postId);
-          console.log(post);
-          return res.json(post);
         } catch (error) {
           console.error('Error getting post by ID:', error.message);
           return res
             .status(500)
             .json({ error: 'Internal Server Error' });
         }
-      } else {
-        return res.json(post);
       }
+      redisClient.set(
+        req.originalUrl,
+        JSON.stringify(post),
+        (err, reply) => {
+          if (err) {
+            console.error('Error setting key in Redis:', err.message);
+            return res
+              .status(500)
+              .json({ error: 'Internal Server Error' });
+          }
+        }
+      );
+      return res.json(post);
     } catch (error) {
       console.error('Error getting post by ID:', error.message);
       return res.status(500).json({ error: 'Internal Server Error' });
