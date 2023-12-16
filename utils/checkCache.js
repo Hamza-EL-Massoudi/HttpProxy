@@ -1,8 +1,7 @@
 const redisClient = require('./redisConnection');
 // Middleware to check the cache first
 const checkCache = (req, res, next) => {
-  const originalUrl = req.query.originalUrl || '/';
-  const key = originalUrl;
+  const key = req.originalUrl;
 
   redisClient.get(key, (err, data) => {
     if (err) throw err;
