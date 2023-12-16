@@ -1,23 +1,37 @@
 // userController.js
 const User = require('../models/userModel');
+const BASE_URL = require('../utils/BASE_URL');
+const redisClient = require('../utils/redisConnection');
 
 class UserController {
-  async saveUser(userData) {
-    try {
-      const newUser = new User(userData);
-      await newUser.save();
-      console.log(
-        `User "${userData.username}" saved to the database.`
-      );
-    } catch (error) {
-      console.error('Error saving user:', error.message);
-      throw new Error('Error saving user');
-    }
-  }
-
   async getAllUsers(req, res) {
     try {
-      const users = await User.find();
+      let users = await User.find();
+
+      if (users.length < 9) {
+        // Fetch users from base_url
+        const fetchedUsers = await fetch(`${BASE_URL}/users`);
+        let data = await fetchedUsers.json();
+
+        // Save fetched users to the database
+        let users = await User.insertMany(data);
+
+        // Update the users array
+        users = fetchedUsers;
+      }
+      redisClient.set(
+        req.originalUrl,
+        JSON.stringify(users),
+        (err, reply) => {
+          if (err) {
+            console.error('Error setting key in Redis:', err.message);
+
+            return res
+              .status(500)
+              .json({ error: 'Internal Server Error' });
+          }
+        }
+      );
       res.json(users);
     } catch (error) {
       console.error('Error getting users:', error.message);
@@ -32,8 +46,23 @@ class UserController {
       const user = await User.findOne({ id: userId });
 
       if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+        response = await fetch(`${BASE_URL}/user/${userId}`);
+        user = await response.json();
       }
+
+      redisClient.set(
+        req.originalUrl,
+        JSON.stringify(user),
+        (err, reply) => {
+          if (err) {
+            console.error('Error setting key in Redis:', err.message);
+
+            return res
+              .status(500)
+              .json({ error: 'Internal Server Error' });
+          }
+        }
+      );
 
       res.json(user);
     } catch (error) {
