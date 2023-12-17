@@ -30,6 +30,9 @@ app.use(express.json());
 app.use(express.static('static'));
 app.use(morgan('dev'));
 
+app.get('/', (req, res) => {
+  res.sendFile('index.html');
+});
 app.use('/withcache/posts', checkCache, postRouter);
 app.use('/withoutcache/posts', postRouter);
 app.use('/withcache/users', checkCache, userRouter);
