@@ -9,7 +9,7 @@ const morgan = require('morgan');
 require('dotenv').config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const BASE_URL = 'https://jsonplaceholder.typicode.com';
 
@@ -28,7 +28,7 @@ mongoose
 
 app.use(express.json());
 app.use(express.static('static'));
-app.use(morgan('combined'));
+app.use(morgan('dev'));
 
 app.use('/withcache/posts', checkCache, postRouter);
 app.use('/withoutcache/posts', postRouter);
