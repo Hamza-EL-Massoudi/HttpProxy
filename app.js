@@ -28,13 +28,10 @@ mongoose
   });
 
 app.use(express.json());
-// app.use(express.static('static'));
+app.use(express.static('public'));
 app.use(morgan('dev'));
 app.use(cors());
 
-app.get('/', (req, res) => {
-  res.sendFile('./static/index.html', { root: __dirname });
-});
 app.use('/withcache/posts', checkCache, postRouter);
 app.use('/withoutcache/posts', postRouter);
 app.use('/withcache/users', checkCache, userRouter);
