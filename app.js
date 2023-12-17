@@ -5,6 +5,7 @@ const postRouter = require('./routes/postRoute');
 const userRouter = require('./routes/userRoute');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
+const cors = require('cors');
 
 require('dotenv').config();
 
@@ -29,6 +30,7 @@ mongoose
 app.use(express.json());
 // app.use(express.static('static'));
 app.use(morgan('dev'));
+app.use(cors());
 
 app.get('/', (req, res) => {
   res.sendFile('./static/index.html', { root: __dirname });
