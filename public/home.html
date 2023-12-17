@@ -64,50 +64,74 @@
         max-width: 90%;
         overflow: auto;
       }
+
+      .timer {
+        font-size: 14px;
+        color: #999;
+        margin-bottom: 10px;
+      }
+
+      /* Styling for the select element with id "resource" */
+      #resource {
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 300px;
+        margin: 1rem;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="form">
+        <select id="resource">
+          <option value="users">Users</option>
+          <option value="posts">Posts</option>
+        </select>
         <input
           type="text"
-          id="url"
-          onkeypress="handleKeyPress(event)"
-          placeholder="Enter a url"
+          id="id"
+          placeholder="Enter an ID (optional)"
         />
         <br />
-        <button type="button" id="submit" onclick="submitForm()">
-          Submit
+        <button type="button" id="submit" onclick="submitForm(false)">
+          Submit without Cache
         </button>
+        <div class="timer" id="timer"></div>
         <div id="result" class="result"></div>
       </div>
       <div class="form">
+        <select id="resource">
+          <option value="users">Users</option>
+          <option value="posts">Posts</option>
+        </select>
         <input
           type="text"
-          id="url2"
-          onkeypress="handleKeyPress2(event)"
-          placeholder="Enter a url with cache"
+          id="id"
+          placeholder="Enter an ID (optional)"
         />
         <br />
-        <button type="button" id="submit" onclick="submitForm2()">
+        <button type="button" id="submit" onclick="submitForm(true)">
           Submit with Cache
         </button>
+        <div class="timer" id="timer2"></div>
         <div id="result2" class="result"></div>
       </div>
     </div>
     <script>
-      function handleKeyPress(e) {
-        if (e.keyCode === 13) {
-          submitForm();
+      function submitForm(withCache) {
+        const resource = document.getElementById('resource');
+        const id = document.getElementById('id');
+        if (id.value) {
+          makeRequest(`${resource.value}/${id.value}`, withCache);
+        } else {
+          makeRequest(`${resource.value}`, withCache);
         }
-      }
-      function submitForm() {
-        const originalUrl = document.getElementById('url').value;
-        makeRequest(originalUrl, false);
       }
 
       async function makeRequest(url, withCache) {
-        // const params = new URLSearchParams({ originalUrl: url });
+        const startTime = new Date().getTime();
         const endpoint = withCache
           ? 'http://localhost:3000/withcache'
           : 'http://localhost:3000/withoutcache';
@@ -119,20 +143,15 @@
         const data = await response.json().catch((err) => {
           console.log(err);
         });
+        const endTime = new Date().getTime();
+        const timeTaken = endTime - startTime;
         console.log(data);
         const resultElement = withCache ? 'result2' : 'result';
         document.getElementById(resultElement).innerText =
           JSON.stringify(data, null, 2); // Convert data to JSON string with indentation
-      }
-
-      function handleKeyPress2(e) {
-        if (e.keyCode === 13) {
-          submitForm2();
-        }
-      }
-      function submitForm2() {
-        const urlWithCache = document.getElementById('url2').value;
-        makeRequest(urlWithCache, true);
+        document.getElementById(
+          `timer${withCache ? '2' : ''}`
+        ).innerText = `Time taken: ${timeTaken}ms`;
       }
     </script>
   </body>
