@@ -1,6 +1,8 @@
 {
     "functions": {
-      "api": "app.js"
+      "api": {
+        "handler": "app.js"
+      }
     },
     "routes": [
       { "src": "/withcache/.*", "dest": "api" },
