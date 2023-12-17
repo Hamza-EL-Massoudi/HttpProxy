@@ -1,0 +1,153 @@
+<!-- FILEPATH: /home/yg/Desktop/GLSID-S3/webTechnology/redis/redis/static/vercel.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div class="px-8 py-6">
+      <div
+        class="border text-card-foreground shadow-md bg-white rounded-md"
+        data-v0-t="card"
+      >
+        <div
+          class="flex flex-col space-y-1.5 p-6 border-b-2 border-gray-200"
+        >
+          <h2 class="text-xl font-semibold">API Testing Interface</h2>
+        </div>
+        <div class="p-4">
+          <div class="flex flex-col gap-4">
+            <div class="flex gap-4">
+              <input
+                id="uri"
+                class="flex h-10 border-input bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border rounded-md p-2 w-full"
+                placeholder="Enter URI"
+              />
+              <input
+                id="id"
+                class="flex h-10 border-input bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border rounded-md p-2 w-1/3"
+                placeholder="Optional ID"
+              />
+              <div class="flex items-center">
+                <label for="cache" class="text-sm font-medium text-gray-700">Cache</label>
+                <input
+                    id="cache"
+                    type="checkbox"
+                    class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 bg-blue-500 text-white rounded-md px-4 py-2"
+                >
+              </div>
+             </div>
+              <button
+                 onclick="submitForm(false)"
+                class="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 bg-blue-500 text-white rounded-md px-4 py-2"
+              >
+                Send Request
+              </button>
+            </div>
+            <div class="flex flex-col gap-2">
+              <h3 class="font-semibold text-lg">Response</h3>
+              <div
+                id="timer"
+                class="inline-flex items-center border w-fit text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 bg-green-500 text-white rounded-full px-3 py-1"
+              >
+                Time Taken: &lt;time&gt; ms
+              </div>
+              <div
+                id="result"
+                class="border rounded-md p-2 bg-gray-100 overflow-auto"
+              >
+                <pre>&lt;JSON data will be displayed here&gt;</pre>
+              </div>
+               
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-gray-100">
+      <div class="container mx-auto mt-8">
+        <div class="bg-white p-8 rounded shadow-md">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+            Instructions for Using the Application
+          </h2>
+          <p class="text-gray-700 leading-loose mb-4">
+            Welcome to our application! Follow the instructions below
+            to make the most out of your experience:
+          </p>
+          <ol class="list-decimal list-inside mb-4">
+            <li class="text-gray-700">
+              Enter manually the uri ,the uri is either
+              posts,posts/{id}/comments or users
+            </li>
+            <li class="text-gray-700">
+              Enter an optional ID in the input field.
+            </li>
+            <li class="text-gray-700">
+              Click the "Submit" button to make a request without
+              cache.
+            </li>
+            <li class="text-gray-700">
+              For cache-enabled requests, use the "Submit with Cache"
+              button.
+            </li>
+            <li class="text-gray-700">
+              Review the response and the time taken in the result
+              section.
+            </li>
+          </ol>
+          <p class="text-gray-700">
+            If you encounter any issues or have questions, feel free
+            to
+            <a href="https://www.github.com/ygwoah" target="_blank"
+              >contact us</a
+            >.
+          </p>
+        </div>
+      </div>
+    </div>
+    <script>
+      function submitForm(withCache) {
+        const resource = document.getElementById('uri');
+        const id = document.getElementById('id');
+        const cache = document.getElementById('cache');
+        console.log(cache.checked);
+        if (id.value) {
+          makeRequest(`${resource.value}/${id.value}`, cache.checked);
+        } else {
+          makeRequest(`${resource.value}`, cache.checked);
+        }
+      }
+
+      async function makeRequest(url, withCache) {
+        const startTime = new Date().getTime();
+        const endpoint = withCache
+          ? 'http://localhost:3000/withcache'
+          : 'http://localhost:3000/withoutcache';
+        const response = await fetch(`${endpoint}/${url}`, {
+          method: 'GET',
+        }).catch((err) => {
+          console.log(err);
+        });
+        const data = await response.json().catch((err) => {
+          console.log(err);
+        });
+        const endTime = new Date().getTime();
+        const timeTaken = endTime - startTime;
+        console.log(data);
+        // const resultElement = withCache ? 'result2' : 'result';
+        document.getElementById('result').innerHTML =
+          '<pre>' + JSON.stringify(data, null, 2) + '</pre>'; // Convert data to JSON string with indentation
+        document.getElementById(
+          `timer`
+        ).innerText = `Time taken: ${timeTaken}ms`;
+      }
+    </script>
+  </body>
+</html>
