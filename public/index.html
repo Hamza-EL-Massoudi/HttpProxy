@@ -129,8 +129,8 @@
       async function makeRequest(url, withCache) {
         const startTime = new Date().getTime();
         const endpoint = withCache
-          ? 'http://localhost:3000/withcache'
-          : 'http://localhost:3000/withoutcache';
+          ? '/withcache'
+          : '/withoutcache';
         const response = await fetch(`${endpoint}/${url}`, {
           method: 'GET',
         }).catch((err) => {
