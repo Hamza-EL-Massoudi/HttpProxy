@@ -27,11 +27,11 @@ mongoose
   });
 
 app.use(express.json());
-app.use(express.static('static'));
+// app.use(express.static('static'));
 app.use(morgan('dev'));
 
 app.get('/', (req, res) => {
-  res.sendFile('index.html');
+  res.sendFile('./static/index.html', { root: __dirname });
 });
 app.use('/withcache/posts', checkCache, postRouter);
 app.use('/withoutcache/posts', postRouter);
