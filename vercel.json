@@ -1,4 +1,11 @@
 {
-    "public": true
-}
+    "functions": {
+      "api": "app.js"
+    },
+    "routes": [
+      { "src": "/withcache/.*", "dest": "api" },
+      { "src": "/withoutcache/.*", "dest": "api" },
+      { "src": "/.*", "dest": "api" }
+    ]
+  }
   
